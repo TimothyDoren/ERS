@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maxtrain.bootcamp.ers.employee.Employee;
+import com.maxtrain.bootcamp.ers.employee.EmployeeRepository;
+
 
 
 
@@ -32,6 +35,9 @@ public class ExpenseController {
 	
 	@Autowired
 	private ExpenseRepository expRepo;
+	
+	@Autowired
+	private EmployeeRepository empRepo;
 	
 	@GetMapping
 	public ResponseEntity<Iterable<Expense>> getExpenses() {
@@ -62,6 +68,22 @@ public class ExpenseController {
 		if(expense.getId() != id) {
 			return new ResponseEntity(HttpStatus.BAD_REQUEST);
 		}
+		expRepo.save(expense);
+		return new ResponseEntity(HttpStatus.NO_CONTENT);
+	}
+	@SuppressWarnings("rawtypes")
+	@PutMapping("{id}")
+	public ResponseEntity PayExpense(@PathVariable int id, @RequestBody Expense expense) {
+		Optional<Expense> expenseToBePaid = expRepo.findById(id);
+		if(expenseToBePaid.isEmpty()) {
+			return new ResponseEntity(HttpStatus.BAD_REQUEST);
+		}
+		expenseToBePaid.get().setStatus(PAID);
+		var total = expenseToBePaid.get().getTotal();
+		Optional<Employee> employee = empRepo.findById(expenseToBePaid.get().getEmployee().getId());
+		employee.get().setExpensesPaid(total);
+		var expensesDue = employee.get().getExpensesDue();
+		employee.get().setExpensesDue(expensesDue -= total);
 		expRepo.save(expense);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
