@@ -6,13 +6,11 @@ import com.maxtrain.bootcamp.ers.item.Item;
 
 import jakarta.persistence.*;
 
+@Entity
+@Table(name="Expenselines")
+	
 public class Expenseline {
 	
-	
-	@Entity
-	@Table(name="Expenselines")
-
-	public class ExpenselineController {
 
 		@Id
 		@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -63,4 +61,3 @@ public class Expenseline {
 		
 
     }
-}
