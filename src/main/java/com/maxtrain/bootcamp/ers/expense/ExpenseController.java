@@ -83,7 +83,8 @@ public class ExpenseController {
 		expenseToBePaid.get().setStatus(PAID);
 		var total = expenseToBePaid.get().getTotal();
 		Optional<Employee> employee = empRepo.findById(expenseToBePaid.get().getEmployee().getId());
-		employee.get().setExpensesPaid(total);
+		var expensePaidEmp = employee.get().getExpensesPaid();
+		employee.get().setExpensesPaid(expensePaidEmp += total);
 		var expensesDue = employee.get().getExpensesDue();
 		employee.get().setExpensesDue(expensesDue -= total);
 		expRepo.save(expenseToBePaid.get());
