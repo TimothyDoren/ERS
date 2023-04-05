@@ -61,8 +61,7 @@ public class ExpenselineController {
 		if(expenseline.getId() != id) {
 			return new ResponseEntity(HttpStatus.BAD_REQUEST);
 		}
-		
-		
+		explRepo.save(expenseline);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 		
 	}
