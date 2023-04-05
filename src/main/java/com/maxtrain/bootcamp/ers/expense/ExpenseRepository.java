@@ -8,7 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ExpenseRepository extends CrudRepository <Expense, Integer> {
     Iterable<Expense> findByStatus(String status);
-    Optional<Expense> findByEmployeeId(int employeeId);
-    Iterable<Expense> findByEmpId(int employeeId);
-    
+    Iterable<Expense> findByEmployeeId(int employeeId);
 }
