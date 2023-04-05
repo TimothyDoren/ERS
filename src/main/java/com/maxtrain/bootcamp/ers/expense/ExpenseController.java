@@ -1,5 +1,6 @@
 package com.maxtrain.bootcamp.ers.expense;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,44 @@ public class ExpenseController {
 	
 	@Autowired
 	private EmployeeRepository empRepo;
+	
+	
+	private boolean UpdateEmployeeExpensesDueAndPaid (int employeeId) {
+		Optional<Expense> expense = expRepo.findByEmployeeId(employeeId);
+		if(expense.isEmpty()) {
+			return false;
+		}
+		
+		Iterable<Expense> expenses = expRepo.findByEmpId(employeeId);	
+	    double expensesDue = 0.0;
+	    double expensesPaid = 0.0;	
+		var emp = empRepo.findById(employeeId);
+		
+		for(var Expense : expenses) {
+			if(Expense.getStatus().equals(PAID)) {
+				expensesPaid += expense.get().getTotal();
+			} else if (!expense.get().getStatus().equals(PAID)) {
+				expensesDue += expense.get().getTotal();
+				}
+		}	
+		emp.get().setExpensesDue(expensesDue);
+		emp.get().setExpensesPaid(expensesPaid);
+		return true;
+}	
+	
+	/*	var sum = expense.get().getTotal();
+		Optional<Employee> employee = empRepo.findById(employeeId);
+		employee.get().setExpensesPaid(sum);
+		var expensesDue = employee.get().getExpensesDue();
+		employee.get().setExpensesDue(expensesDue -= sum);
+		expRepo.save(expense);
+		return true;
+	}
+		*/
+	
+	
+	
+	
 	
 	@GetMapping
 	public ResponseEntity<Iterable<Expense>> getExpenses() {
@@ -89,6 +128,7 @@ public class ExpenseController {
 		expRepo.save(expense);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
+		
 	@PutMapping("review/{id}")
 	public ResponseEntity reviewExpenses(@PathVariable int id, @RequestBody Expense expense) {
 		String newStatus = expense.getTotal() <= 75 ? APPROVED : REVIEW;
@@ -100,6 +140,7 @@ public class ExpenseController {
 		empRepo.save(employee.get());
 		return putExpense(id, expense);   
 	}
+	
 	@SuppressWarnings("rawtypes")
 	@PutMapping("approved/{id}")
 	public ResponseEntity approveExpense(@PathVariable int id, @RequestBody Expense expense) {
