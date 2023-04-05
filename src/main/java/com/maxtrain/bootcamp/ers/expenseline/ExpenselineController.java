@@ -15,7 +15,9 @@ import com.maxtrain.bootcamp.ers.item.ItemRepository;
 
 import jakarta.persistence.*;
 
-
+@CrossOrigin
+@RestController
+@RequestMapping("/api/expenselines")
 public class ExpenselineController {
 	
 	@Autowired
@@ -30,7 +32,6 @@ public class ExpenselineController {
 	public ResponseEntity<Iterable<Expenseline>> getExpenselines() { 
 		Iterable<Expenseline> expenselines = explRepo.findAll();
 		return new ResponseEntity<Iterable<Expenseline>>(expenselines, HttpStatus.OK); 
-		
 	} 
 	
 	@GetMapping("{id}")
@@ -41,8 +42,6 @@ public class ExpenselineController {
 		}
 		return new ResponseEntity<Expenseline>(expenseline.get(), HttpStatus.OK);
 	}
-
-	
 	@PostMapping
 	public ResponseEntity<Expenseline> postExpenseline (@RequestBody Expenseline expenseline) {
 		Expenseline newExpenseline = explRepo.save(expenseline);
@@ -50,9 +49,7 @@ public class ExpenselineController {
 		if(!expense.isEmpty() ) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-		
-		return new ResponseEntity<Expenseline>(newExpenseline, HttpStatus.CREATED);
-		
+		return new ResponseEntity<Expenseline>(newExpenseline, HttpStatus.CREATED);	
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -63,20 +60,15 @@ public class ExpenselineController {
 		}
 		explRepo.save(expenseline);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
-		
 	}
-
 	@SuppressWarnings("rawtypes")
 	@DeleteMapping("{id}")
 	public ResponseEntity deleteExpenseline(@PathVariable int id) {
 		Optional<Expenseline> expenseline = explRepo.findById(id);
 		if(expenseline.isEmpty()) {
 			return new ResponseEntity(HttpStatus.NOT_FOUND);
-		}
-		
+		}	
 		explRepo.delete(expenseline.get());
-		
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
-	
 }
