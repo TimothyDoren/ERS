@@ -86,7 +86,7 @@ public class ExpenseController {
 		employee.get().setExpensesPaid(total);
 		var expensesDue = employee.get().getExpensesDue();
 		employee.get().setExpensesDue(expensesDue -= total);
-		expRepo.save(expense);
+		expRepo.save(expenseToBePaid.get());
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
 	@PutMapping("review/{id}")
