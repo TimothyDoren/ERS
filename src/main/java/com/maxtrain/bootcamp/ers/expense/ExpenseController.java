@@ -74,7 +74,7 @@ public class ExpenseController {
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
 	@SuppressWarnings("rawtypes")
-	@PutMapping("{id}")
+	@PutMapping("pay/{id}")
 	public ResponseEntity PayExpense(@PathVariable int id, @RequestBody Expense expense) {
 		Optional<Expense> expenseToBePaid = expRepo.findById(id);
 		if(expenseToBePaid.isEmpty()) {
@@ -88,7 +88,7 @@ public class ExpenseController {
 		employee.get().setExpensesDue(expensesDue -= total);
 		expRepo.save(expense);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
-  }
+	}
 	@PutMapping("review/{id}")
 	public ResponseEntity reviewExpenses(@PathVariable int id, @RequestBody Expense expense) {
 		String newStatus = expense.getTotal() <= 75 ? APPROVED : REVIEW;
