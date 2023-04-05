@@ -21,7 +21,6 @@ import com.maxtrain.bootcamp.ers.employee.EmployeeRepository;
 
 
 
-
 @CrossOrigin
 @RestController
 @RequestMapping("/api/expenses")
@@ -57,6 +56,11 @@ public class ExpenseController {
 		Iterable<Expense> expensesInReview = (Iterable<Expense>) expRepo.findByStatus(REVIEW); 
 		return new ResponseEntity<Iterable<Expense>>(expensesInReview, HttpStatus.OK);
 	} 
+	@GetMapping("approved")
+	public ResponseEntity<Iterable<Expense>> getApprovedExpenses(){
+		Iterable<Expense> approvedExpenses = expRepo.findByStatus(APPROVED);
+		return new ResponseEntity<Iterable<Expense>>(approvedExpenses, HttpStatus.OK);
+	}
 	@PostMapping  
 	public ResponseEntity<Expense> postExpense (@RequestBody Expense expense){
 		Expense newExpense = expRepo.save(expense);
@@ -72,7 +76,7 @@ public class ExpenseController {
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
 	@SuppressWarnings("rawtypes")
-	@PutMapping("{id}")
+	@PutMapping("pay/{id}")
 	public ResponseEntity PayExpense(@PathVariable int id, @RequestBody Expense expense) {
 		Optional<Expense> expenseToBePaid = expRepo.findById(id);
 		if(expenseToBePaid.isEmpty()) {
@@ -86,6 +90,29 @@ public class ExpenseController {
 		employee.get().setExpensesDue(expensesDue -= total);
 		expRepo.save(expense);
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
+	}
+	@PutMapping("review/{id}")
+	public ResponseEntity reviewExpenses(@PathVariable int id, @RequestBody Expense expense) {
+		String newStatus = expense.getTotal() <= 75 ? APPROVED : REVIEW;
+		expense.setStatus(newStatus);
+		Optional<Employee> employee = empRepo.findById(expense.getEmployee().getId());
+		if(newStatus.equals("APPROVED")) {
+			employee.get().setExpensesDue(employee.get().getExpensesDue() + expense.getTotal());
+		}
+		empRepo.save(employee.get());
+		return putExpense(id, expense);   
+	}
+	@SuppressWarnings("rawtypes")
+	@PutMapping("approved/{id}")
+	public ResponseEntity approveExpense(@PathVariable int id, @RequestBody Expense expense) {
+		expense.setStatus(APPROVED); 
+		return putExpense(id, expense);
+	}
+	@SuppressWarnings("rawtypes")
+	@PutMapping("reject/{id}")
+	public ResponseEntity rejectExpense(@PathVariable int id, @RequestBody Expense expense) {
+		expense.setStatus(REJECTED);
+		return putExpense(id, expense);
 	}
 	@SuppressWarnings("rawtypes")
 	@DeleteMapping("{id}")
