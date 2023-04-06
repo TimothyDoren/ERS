@@ -13,6 +13,7 @@ import com.maxtrain.bootcamp.ers.expense.ExpenseRepository;
 import com.maxtrain.bootcamp.ers.item.Item;
 import com.maxtrain.bootcamp.ers.item.ItemRepository;
 
+
 import jakarta.persistence.*;
 
 @CrossOrigin
@@ -27,6 +28,27 @@ public class ExpenselineController {
 	@Autowired
 	private ItemRepository itemRepo;
 	
+private boolean recalculateExpenseTotal(int expenseId) {
+		
+		Optional<Expense> anExpense = expRepo.findById(expenseId);
+	
+		if(anExpense.isEmpty()) {
+			return false;
+		}
+		
+	    Expense expense = anExpense.get();
+	
+	    Iterable<Expenseline> expenselines = explRepo.findByExpenseId(expenseId);
+	    double total = 0;
+	    for(Expenseline expl : expenselines) {
+	    	total += expl.getQuantity() * expl.getItem().getPrice();
+	    }
+	    expense.setTotal(total);
+	    expRepo.save(expense);
+	    return true;
+	    
+	    
+	}
 
 	@GetMapping
 	public ResponseEntity<Iterable<Expenseline>> getExpenselines() { 
@@ -44,13 +66,20 @@ public class ExpenselineController {
 	}
 	@PostMapping
 	public ResponseEntity<Expenseline> postExpenseline (@RequestBody Expenseline expenseline) {
-		Expenseline newExpenseline = explRepo.save(expenseline);
+		Expenseline newExpenseline = explRepo.save(expenseline);	
 		Optional<Expense> expense = expRepo.findById(expenseline.getExpense().getId());
-		if(!expense.isEmpty() ) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		if(expense.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		if(!expense.isEmpty()) {
+			boolean success = recalculateExpenseTotal(expense.get().getId());
+			if(!success) {
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
 			}
+		}
 		return new ResponseEntity<Expenseline>(newExpenseline, HttpStatus.CREATED);	
-	}
+		
+}
 
 	@SuppressWarnings("rawtypes")
 	@PutMapping("{id}")
@@ -59,6 +88,13 @@ public class ExpenselineController {
 			return new ResponseEntity(HttpStatus.BAD_REQUEST);
 		}
 		explRepo.save(expenseline);
+		Optional<Expense> expense = expRepo.findById(expenseline.getExpense().getId());
+		if(!expense.isEmpty()) {
+			boolean success = recalculateExpenseTotal(expense.get().getId());
+			if(!success) {
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); 
+			}
+		}
 		return new ResponseEntity(HttpStatus.NO_CONTENT);
 	}
 	@SuppressWarnings("rawtypes")
@@ -69,6 +105,14 @@ public class ExpenselineController {
 			return new ResponseEntity(HttpStatus.NOT_FOUND);
 		}	
 		explRepo.delete(expenseline.get());
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		Optional<Expense> expense = expRepo.findById(expenseline.get().getExpense().getId());
+		if(!expense.isEmpty()) { 
+		   boolean success = recalculateExpenseTotal(expense.get().getId());
+		   if(!success) {
+		       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);  
+		   }
+		}
+		   return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
 	}
 }
+	
