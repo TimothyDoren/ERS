@@ -30,19 +30,20 @@ public class ExpenseController {
 		if(expenses.equals(null)) {
 			return false;
 		}
-	    double expensesDue = 0.0;
-	    double expensesPaid = 0.0;
 	    var emp = empRepo.findById(employeeId);
+	    double newExpensesDue = emp.get().getExpensesDue();
+	    double newExpensesPaid = emp.get().getExpensesPaid();
 		for(var Expense : expenses) {
 			emp = empRepo.findById(employeeId);
 			if(Expense.getStatus().equals(PAID)) {
-				expensesPaid += Expense.getTotal();
+				newExpensesPaid += Expense.getTotal();
 			} else if (!Expense.getStatus().equals(PAID)) {
-				expensesDue += Expense.getTotal();
+				newExpensesDue += Expense.getTotal();
 			}
 		}	
-		emp.get().setExpensesDue(expensesDue);
-		emp.get().setExpensesPaid(expensesPaid);
+		emp.get().setExpensesDue(newExpensesDue);
+		emp.get().setExpensesPaid(newExpensesPaid);
+		expRepo.saveAll(expenses);
 		return true;
 	}		
 	@GetMapping
