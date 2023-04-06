@@ -29,25 +29,19 @@ public class ExpenselineController {
 	private ItemRepository itemRepo;
 	
 private boolean recalculateExpenseTotal(int expenseId) {
-		
 		Optional<Expense> anExpense = expRepo.findById(expenseId);
-	
 		if(anExpense.isEmpty()) {
 			return false;
 		}
-		
 	    Expense expense = anExpense.get();
-	
 	    Iterable<Expenseline> expenselines = explRepo.findByExpenseId(expenseId);
 	    double total = 0;
 	    for(Expenseline expl : expenselines) {
 	    	total += expl.getQuantity() * expl.getItem().getPrice();
 	    }
 	    expense.setTotal(total);
-	    expRepo.save(expense);
+	    expRepo.save(expense); 
 	    return true;
-	    
-	    
 	}
 
 	@GetMapping

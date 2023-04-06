@@ -31,13 +31,16 @@ public class ExpenseController {
 			return false;
 		}
 	    var emp = empRepo.findById(employeeId);
-	    double newExpensesDue = emp.get().getExpensesDue();
-	    double newExpensesPaid = emp.get().getExpensesPaid();
+	    double newExpensesDue = 0;
+	    double newExpensesPaid = 0;
 		for(var Expense : expenses) {
 			emp = empRepo.findById(employeeId);
-			if(Expense.getStatus().equals(PAID)) {
+			if(emp.isEmpty()) {
+				return false;
+			}
+			if(Expense.getStatus().equals("PAID")) { 
 				newExpensesPaid += Expense.getTotal();
-			} else if (!Expense.getStatus().equals(PAID)) {
+			} else if (!Expense.getStatus().equals("PAID")) {
 				newExpensesDue += Expense.getTotal();
 			}
 		}	
